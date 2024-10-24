@@ -1,0 +1,167 @@
+using System;
+
+namespace MotorVehicleExpenseCalculator
+{
+    // Abstract class to represent an expense
+    abstract class Expense
+    {
+        // Amount of the expense
+        public double Amt { get; protected set; }
+
+        // Abstract method to set the amount of the expense
+        public abstract void SetAmt();
+    }
+
+    // Define other expense classes...
+
+    // Class representing the expense for a motor vehicle loan
+    class MtrVhclLnExpense : Expense
+    {
+        // Method to set the amount of the motor vehicle loan expense
+        public override void SetAmt()
+        {
+            Console.Write("Enter monthly motor vehicle loan repayment: ");
+            Amt = double.Parse(Console.ReadLine());
+        }
+    }
+
+    class Program
+    {
+        // Main method
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Welcome to the Motor Vehicle Expense Calculator!");
+            Console.WriteLine("Please enter your financial details:");
+
+            // Get user's monthly gross income
+            double grsInc = GetValidDoubleInput("Monthly gross income: ");
+
+            // Get user's monthly tax deductions
+            double txDed = GetValidDoubleInput("Monthly tax deductions: ");
+
+            // Calculate user's net income
+            double netInc = grsInc - txDed;
+            Console.WriteLine($"Net income: {netInc}");
+
+            // Gather user's motor vehicle expenses
+            Expense[] expns = GatherExpenses();
+
+            // Calculate total monthly expenses
+            double ttlExp = CalculateTotalExpenses(expns);
+            Console.WriteLine($"Total expenses: {ttlExp}");
+
+            // Ask user whether they want to buy or hire a Motor Vehicle
+            string chc = GetUserChoice("Do you want to buy or hire a Motor Vehicle?");
+
+            if (chc.ToLower() == "hire")
+            {
+                // Get the hiring cost per month
+                double hrngCst = GetValidDoubleInput("Enter hiring cost per month: ");
+
+                // Calculate amount left after all expenses including hiring cost
+                double amtLeft = netInc - ttlExp - hrngCst;
+
+                // Display financial details
+                DisplayFinancialDetails(grsInc, netInc, amtLeft);
+            }
+            else if (chc.ToLower() == "buy")
+            {
+                // Prompt user for motor vehicle loan details
+                Expense mtrVhclLn = new MtrVhclLnExpense();
+                mtrVhclLn.SetAmt();
+
+                // Calculate amount left after all expenses including loan repayment
+                double amtLeft = netInc - ttlExp - mtrVhclLn.Amt;
+
+                // Display financial details
+                DisplayFinancialDetails(grsInc, netInc, amtLeft);
+            }
+            else
+            {
+                Console.WriteLine("Invalid choice.");
+            }
+        }
+
+        // Method to get a valid double input from the user
+        static double GetValidDoubleInput(string prmpt)
+        {
+            double input;
+            while (true)
+            {
+                Console.Write(prmpt);
+                if (double.TryParse(Console.ReadLine(), out input))
+                {
+                    return input;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid input. Please enter a valid number.");
+                }
+            }
+        }
+
+        // Method to gather user's motor vehicle expenses
+        static Expense[] GatherExpenses()
+        {
+            Expense[] expns = new Expense[4];
+            expns[0] = new FuelExpense();
+            expns[1] = new InsuranceExpense();
+            expns[2] = new ParkingExpense();
+            expns[3] = new MaintenanceExpense();
+
+            foreach (var expense in expns)
+            {
+                expense.SetAmt();
+            }
+
+            return expns;
+        }
+
+        // Method to calculate total monthly expenses
+        static double CalculateTotalExpenses(Expense[] expns)
+        {
+            double ttlExp = 0;
+            foreach (var expense in expns)
+            {
+                ttlExp += expense.Amt;
+            }
+            return ttlExp;
+        }
+
+        // Method to get user's choice to buy or hire a Motor Vehicle
+        static string GetUserChoice(string prmpt)
+        {
+            while (true)
+            {
+                Console.WriteLine(prmpt);
+                string choice = Console.ReadLine().ToLower();
+                if (choice == "buy" || choice == "hire")
+                {
+                    return choice;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid choice. Please enter 'buy' or 'hire'.");
+                }
+            }
+        }
+
+        // Method to display financial details
+        static void DisplayFinancialDetails(double grsInc, double netInc, double amtLeft)
+        {
+            Console.WriteLine($"Gross Income: {grsInc}");
+            Console.WriteLine($"Net Income: {netInc}");
+            Console.WriteLine($"Amount left after expenses: {amtLeft}");
+
+            if (amtLeft >= 0)
+            {
+                Console.WriteLine("You can afford to buy or hire a Motor Vehicle.");
+            }
+            else
+            {
+                Console.WriteLine("You cannot afford to buy or hire a Motor Vehicle.");
+            }
+        }
+    }
+}
+
